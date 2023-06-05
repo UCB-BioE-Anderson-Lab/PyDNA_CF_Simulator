@@ -48,7 +48,6 @@ class Transform(Step):
         self.antibiotics = antibiotics
         self.temperature = temperature
 
-
 class ConstructionFile:
     def __init__(self, steps, sequences):
         self.steps = steps
