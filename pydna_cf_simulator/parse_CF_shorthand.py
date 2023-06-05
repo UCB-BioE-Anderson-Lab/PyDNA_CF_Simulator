@@ -1,3 +1,5 @@
+import re
+
 from .construction_file import ConstructionFile, PCR, Digest, Ligate, GoldenGate, Gibson, Transform
 from .polynucleotide import Polynucleotide, oligo, plasmid
 
@@ -17,49 +19,93 @@ def parse_CF_shorthand(cf_shorthand):
             if len(elements) == 2:
                 # It's a sequence, store it
                 name, sequence = elements
-                if len(sequence) < 100:
-                    sequences[name] = oligo(sequence)
+                if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
+                    if len(sequence) < 100:
+                        sequences[name] = oligo(sequence)
+                    else:
+                        sequences[name] = plasmid(sequence)
                 else:
-                    sequences[name] = plasmid(sequence)
+                    raise ValueError(f"Error in line {line_num}: Invalid sequence format. Sequences must only contain characters 'A', 'T', 'C', 'G', 'N', 'R', 'K', 'Y', 'S', 'W', 'B', 'V', 'H', 'D', and be at least one character long.")
             else:
                 # It's a step, parse it
                 operation = elements[0]
 
                 if operation == 'PCR':
-                    if len(elements) == 6:
-                        forward_primer, reverse_primer, template, product_size, product_name = elements[1:]
-                        steps.append(PCR(forward_primer, reverse_primer, template, product_name, int(product_size)))
-                    else:
-                        forward_primer, reverse_primer, template, product_name = elements[1:]
-                        steps.append(PCR(forward_primer, reverse_primer, template, product_name))
+                    try:
+                        if len(elements) == 6:
+                            forward_primer, reverse_primer, template, product_size, product_name = elements[1:]
+                            steps.append(PCR(forward_primer, reverse_primer, template, product_name, int(product_size)))
+                        else:
+                            forward_primer, reverse_primer, template, product_name = elements[1:]
+                            steps.append(PCR(forward_primer, reverse_primer, template, product_name))
+                    except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for PCR operation.")
                 elif operation == 'Digest':
-                    dna, enzymes, frag_select, product_name = elements[1:]
-                    enzymes = [enzyme for enzyme in enzymes.split(',') if enzyme in ALL_ENZYMES]
-                    steps.append(Digest(dna, enzymes, int(frag_select), product_name))
+                    try:
+                        if len(elements) == 5:
+                            dna, enzymes, frag_select, product_name = elements[1:]
+                            enzymes = enzymes.split(',')
+                            unrecognized_enzymes = [enzyme for enzyme in enzymes if enzyme not in ALL_ENZYMES]
+                            if unrecognized_enzymes:
+                                raise ValueError(f"Error in line {line_num}: Unrecognized enzyme(s): {', '.join(unrecognized_enzymes)}")
+                            steps.append(Digest(dna, enzymes, int(frag_select), product_name))
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Digest operation.")
+                    except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid argument type for Digest operation.")
                 elif operation == 'Ligate':
-                    dnas, product_name = elements[1:-1], elements[-1]
-                    steps.append(Ligate(dnas, product_name))
+                    try:
+                        if len(elements) >= 4:
+                            dnas, product_name = elements[1:-1], elements[-1]
+                            if len(dnas) < 2:
+                                raise ValueError(f"Error in line {line_num}: Ligate operation requires at least 2 DNA inputs.")
+                            steps.append(Ligate(dnas, product_name))
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Ligate operation.")
+                    except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid argument type for Ligate operation.")
                 elif operation == 'GoldenGate':
-                    inputs, enzyme, product_name = elements[1:-1], elements[-2], elements[-1]
-                    if enzyme not in TYPE_IIS_ENZYMES:
-                        raise ValueError(f"Invalid enzyme {enzyme} for GoldenGate. Must be one of {TYPE_IIS_ENZYMES}.")
-                    steps.append(GoldenGate(inputs, enzyme, product_name))
+                    try:
+                        if len(elements) >= 5:
+                            inputs, enzyme, product_name = elements[1:-1], elements[-2], elements[-1]
+                            if len(inputs) < 2:
+                                raise ValueError(f"Error in line {line_num}: GoldenGate operation requires at least 2 inputs.")
+                            if enzyme not in TYPE_IIS_ENZYMES:
+                                raise ValueError(f"Invalid enzyme {enzyme} for GoldenGate. Must be one of {TYPE_IIS_ENZYMES}.")
+                            steps.append(GoldenGate(inputs, enzyme, product_name))
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid number of arguments for GoldenGate operation.")
+                    except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid argument type for GoldenGate operation.")
                 elif operation == 'Gibson':
-                    inputs, product_name = elements[1:-1], elements[-1]
-                    steps.append(Gibson(inputs, product_name))
+                    try:
+                        if len(elements) >= 4:
+                            inputs, product_name = elements[1:-1], elements[-1]
+                            if len(inputs) < 2:
+                                raise ValueError(f"Error in line {line_num}: Gibson operation requires at least 2 inputs.")
+                            steps.append(Gibson(inputs, product_name))
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Gibson operation.")
+                    except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid argument type for Gibson operation.")
                 elif operation == 'Transform':
-                    if len(elements) == 6:
-                        dna, strain, antibiotics, temperature, output = elements[1:]
-                        antibiotics = antibiotics.split(',')
-                        try:
-                            temperature = int(temperature)
-                        except ValueError:
-                            raise ValueError(f"Error in line {line_num}: Invalid temperature '{temperature}'. Must be an integer.")
-                    else:
-                        dna, strain, antibiotics, output = elements[1:]
-                        antibiotics = antibiotics.split(',')
-                        temperature = None
-                    steps.append(Transform(dna, strain, antibiotics, output, temperature))
+                    try:
+                        if len(elements) == 6:
+                            dna, strain, antibiotics, temperature, output = elements[1:]
+                            antibiotics = antibiotics.split(',')
+                            try:
+                                temperature = int(temperature)
+                            except ValueError:
+                                raise ValueError(f"Error in line {line_num}: Invalid temperature '{temperature}'. Must be an integer.")
+                        else:
+                            dna, strain, antibiotics, output = elements[1:]
+                            antibiotics = antibiotics.split(',')
+                            temperature = None
+                        steps.append(Transform(dna, strain, antibiotics, output, temperature))
+                    except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid argument type for Transform operation.")
+                    except IndexError:
+                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Transform operation.")
                 else:
                     raise ValueError(f"Error in line {line_num}: Invalid operation {operation}")
         except (ValueError, IndexError) as e:
