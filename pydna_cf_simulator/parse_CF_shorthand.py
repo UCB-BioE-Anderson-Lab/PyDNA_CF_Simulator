@@ -5,6 +5,7 @@ from .polynucleotide import Polynucleotide, oligo, plasmid
 
 ALL_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI', 'BamHI', 'BglII', 'EcoRI', 'XhoI', 'SpeI', 'XbaI', 'PstI', 'HindIII', 'NotI', 'XmaI', 'SmaI', 'KpnI', 'SacI', 'SalI']
 TYPE_IIS_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI']
+VALID_ANTIBIOTICS = {'Amp', 'Carb', 'Cam', 'Kan', 'Gen', 'Spec', 'Trim'}
 
 def parse_CF_shorthand(cf_shorthand):
     lines = cf_shorthand.split('\n')
@@ -93,6 +94,7 @@ def parse_CF_shorthand(cf_shorthand):
                         if len(elements) == 6:
                             dna, strain, antibiotics, temperature, output = elements[1:]
                             antibiotics = antibiotics.split(',')
+                            validate_antibiotics(antibiotics, line_num)
                             try:
                                 temperature = int(temperature)
                             except ValueError:
@@ -100,6 +102,7 @@ def parse_CF_shorthand(cf_shorthand):
                         else:
                             dna, strain, antibiotics, output = elements[1:]
                             antibiotics = antibiotics.split(',')
+                            validate_antibiotics(antibiotics, line_num)
                             temperature = None
                         steps.append(Transform(dna, strain, antibiotics, output, temperature))
                     except ValueError:
@@ -112,3 +115,8 @@ def parse_CF_shorthand(cf_shorthand):
             raise ValueError(f"Error in line {line_num}: {str(e)}")
 
     return ConstructionFile(steps, sequences)
+
+def validate_antibiotics(antibiotics, line_num):
+    unrecognized_antibiotics = [antibiotic for antibiotic in antibiotics if antibiotic not in VALID_ANTIBIOTICS]
+    if unrecognized_antibiotics:
+        raise ValueError(f"Error in line {line_num}: Unrecognized antibiotic(s): {', '.join(unrecognized_antibiotics)}")
