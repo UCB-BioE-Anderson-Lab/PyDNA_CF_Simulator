@@ -35,16 +35,20 @@ def parse_CF_shorthand(cf_shorthand):
                     try:
                         if len(elements) == 6:
                             forward_primer, reverse_primer, template, product_size, product_name = elements[1:]
+                            validate_int(product_size, line_num)
                             steps.append(PCR(forward_primer, reverse_primer, template, product_name, int(product_size)))
                         else:
                             forward_primer, reverse_primer, template, product_name = elements[1:]
                             steps.append(PCR(forward_primer, reverse_primer, template, product_name))
                     except ValueError:
+                        raise ValueError(f"Error in line {line_num}: Invalid argument type for PCR operation.")
+                    except IndexError:
                         raise ValueError(f"Error in line {line_num}: Invalid number of arguments for PCR operation.")
                 elif operation == 'Digest':
                     try:
                         if len(elements) == 5:
                             dna, enzymes, frag_select, product_name = elements[1:]
+                            validate_int(frag_select, line_num)
                             enzymes = enzymes.split(',')
                             unrecognized_enzymes = [enzyme for enzyme in enzymes if enzyme not in ALL_ENZYMES]
                             if unrecognized_enzymes:
@@ -54,6 +58,8 @@ def parse_CF_shorthand(cf_shorthand):
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Digest operation.")
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Digest operation.")
+                    except IndexError:
+                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Digest operation.")
                 elif operation == 'Ligate':
                     try:
                         if len(elements) >= 4:
@@ -95,16 +101,13 @@ def parse_CF_shorthand(cf_shorthand):
                             dna, strain, antibiotics, temperature, output = elements[1:]
                             antibiotics = antibiotics.split(',')
                             validate_antibiotics(antibiotics, line_num)
-                            try:
-                                temperature = int(temperature)
-                            except ValueError:
-                                raise ValueError(f"Error in line {line_num}: Invalid temperature '{temperature}'. Must be an integer.")
+                            validate_int(temperature, line_num)
+                            steps.append(Transform(dna, strain, antibiotics, output, int(temperature)))
                         else:
                             dna, strain, antibiotics, output = elements[1:]
                             antibiotics = antibiotics.split(',')
                             validate_antibiotics(antibiotics, line_num)
-                            temperature = None
-                        steps.append(Transform(dna, strain, antibiotics, output, temperature))
+                            steps.append(Transform(dna, strain, antibiotics, output))
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Transform operation.")
                     except IndexError:
@@ -115,6 +118,12 @@ def parse_CF_shorthand(cf_shorthand):
             raise ValueError(f"Error in line {line_num}: {str(e)}")
 
     return ConstructionFile(steps, sequences)
+
+def validate_int(value, line_num):
+    try:
+        int(value)
+    except ValueError:
+        raise ValueError(f"Error in line {line_num}: Invalid argument type. Must be an integer.")
 
 def validate_antibiotics(antibiotics, line_num):
     unrecognized_antibiotics = [antibiotic for antibiotic in antibiotics if antibiotic not in VALID_ANTIBIOTICS]
