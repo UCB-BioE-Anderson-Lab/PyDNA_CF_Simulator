@@ -6,6 +6,7 @@ from pydna.primer import Primer
 from Bio.Restriction import Restriction
 
 from construction_file import PCR, Digest, Ligate, GoldenGate, Gibson, Transform
+from polynucleotide import Polynucleotide, dsDNA, oligo, plasmid
 
 
 def simulate_CF(CF):
@@ -65,10 +66,10 @@ def simulate_CF(CF):
             raise ValueError('Invalid operation: ' + step.operation)
 
         # Check if the sequence is an oligo or a plasmid
-        if len(product_sequence) < 100:
+        if isinstance(product_sequence, oligo):
             # It's an oligo, make it single stranded and linear
             product_sequence = Dseqrecord(product_sequence.seq, linear=True)
-        else:
+        elif isinstance(product_sequence, plasmid):
             # It's a plasmid, make it double stranded and circular
             product_sequence = Dseqrecord(product_sequence.seq, circular=True)
 
