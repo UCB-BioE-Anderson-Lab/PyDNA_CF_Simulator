@@ -96,3 +96,53 @@ def test_parse_multiple_sequences():
     assert len(cf.sequences) == 2
     assert isinstance(cf.sequences['P6libF'], Polynucleotide)
     assert isinstance(cf.sequences['P6libR'], Polynucleotide)
+
+def test_parse_invalid_sequence_format():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('P6libF CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAXXXGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_number_of_arguments_pcr():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('PCR ForwardPrimer ReversePrimer')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_number_of_arguments_digest():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Digest DNA EcoRI,BamHI 1 ProductName ExtraArg')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_number_of_arguments_ligate():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Ligate Fragment1 Fragment2')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_number_of_arguments_golden_gate():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('GoldenGate Fragment1')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_number_of_arguments_gibson():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Gibson Fragment1')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_number_of_arguments_transform():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Transform DNA Strain Amp')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_temperature_transform():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Transform DNA Strain Amp InvalidTemperature ProductName')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_unrecognized_enzyme_digest():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Digest DNA EcoRI,NotAnEnzyme,XbaI 1 ProductName')
+    assert isinstance(e.value, ValueError)
+
+def test_parse_invalid_sequence_number():
+    with pytest.raises(ValueError) as e:
+        parse_CF_shorthand('Digest DNA EcoRI,BamHI -1 ProductName')
+    assert isinstance(e.value, ValueError)

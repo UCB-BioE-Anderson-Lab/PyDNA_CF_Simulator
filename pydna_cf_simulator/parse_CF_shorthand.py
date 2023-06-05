@@ -49,23 +49,24 @@ def parse_CF_shorthand(cf_shorthand):
                         if len(elements) == 5:
                             dna, enzymes, frag_select, product_name = elements[1:]
                             validate_int(frag_select, line_num)
+                            frag_select = int(frag_select)
+                            if frag_select < 0:
+                                raise ValueError(f"Error in line {line_num}: Invalid sequence number '{frag_select}'. Must be a non-negative integer.")
                             enzymes = enzymes.split(',')
                             unrecognized_enzymes = [enzyme for enzyme in enzymes if enzyme not in ALL_ENZYMES]
                             if unrecognized_enzymes:
                                 raise ValueError(f"Error in line {line_num}: Unrecognized enzyme(s): {', '.join(unrecognized_enzymes)}")
-                            steps.append(Digest(dna, enzymes, int(frag_select), product_name))
+                            steps.append(Digest(dna, enzymes, frag_select, product_name))
                         else:
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Digest operation.")
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Digest operation.")
-                    except IndexError:
-                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Digest operation.")
                 elif operation == 'Ligate':
                     try:
                         if len(elements) >= 4:
                             dnas, product_name = elements[1:-1], elements[-1]
-                            if len(dnas) < 2:
-                                raise ValueError(f"Error in line {line_num}: Ligate operation requires at least 2 DNA inputs.")
+                            if len(dnas) < 1:
+                                raise ValueError(f"Error in line {line_num}: Ligate operation requires at least 1 DNA inputs.")
                             steps.append(Ligate(dnas, product_name))
                         else:
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Ligate operation.")
@@ -75,8 +76,8 @@ def parse_CF_shorthand(cf_shorthand):
                     try:
                         if len(elements) >= 5:
                             inputs, enzyme, product_name = elements[1:-1], elements[-2], elements[-1]
-                            if len(inputs) < 2:
-                                raise ValueError(f"Error in line {line_num}: GoldenGate operation requires at least 2 inputs.")
+                            if len(inputs) < 1:
+                                raise ValueError(f"Error in line {line_num}: GoldenGate operation requires at least 1 inputs.")
                             if enzyme not in TYPE_IIS_ENZYMES:
                                 raise ValueError(f"Invalid enzyme {enzyme} for GoldenGate. Must be one of {TYPE_IIS_ENZYMES}.")
                             steps.append(GoldenGate(inputs, enzyme, product_name))
@@ -88,8 +89,8 @@ def parse_CF_shorthand(cf_shorthand):
                     try:
                         if len(elements) >= 4:
                             inputs, product_name = elements[1:-1], elements[-1]
-                            if len(inputs) < 2:
-                                raise ValueError(f"Error in line {line_num}: Gibson operation requires at least 2 inputs.")
+                            if len(inputs) < 1:
+                                raise ValueError(f"Error in line {line_num}: Gibson operation requires at least 1 inputs.")
                             steps.append(Gibson(inputs, product_name))
                         else:
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Gibson operation.")
