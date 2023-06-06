@@ -7,20 +7,39 @@ ALL_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI', 'BamHI', 'BglII
 TYPE_IIS_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI']
 VALID_ANTIBIOTICS = {'Amp', 'Carb', 'Cam', 'Kan', 'Gen', 'Spec', 'Trim'}
 
+REQUIRED_FIELDS = {
+    'PCR': {'output', 'forward_oligo', 'reverse_oligo', 'template'},
+    'Digest': {'dna', 'enzymes', 'fragSelect', 'output'},
+    'Ligate': {'dnas', 'output'},
+    'GoldenGate': {'inputs', 'enzyme', 'output'},
+    'Gibson': {'inputs', 'output'},
+    'Transform': {'dna', 'strain', 'antibiotics', 'output'}
+}
+
 def parse_CF_JSON(json_string):
     cf_dict = json.loads(json_string)
     
     # Parse sequences
     sequences = {}
     for name, seq_dict in cf_dict['sequences'].items():
+        if name in sequences:
+            raise ValueError(f'Duplicate sequence name {name} in the sequences.')
         sequences[name] = Polynucleotide(seq_dict["sequence"], seq_dict["ext5"], seq_dict["ext3"], 
                                          seq_dict["is_double_stranded"], seq_dict["is_circular"], 
                                          seq_dict["mod_ext5"], seq_dict["mod_ext3"])
-    
+
     # Parse steps
     steps = []
     for step_dict in cf_dict['steps']:
-        op = step_dict.pop('operation')
+        op = step_dict.get('operation')
+
+        # Validate required fields
+        required_fields = REQUIRED_FIELDS.get(op)
+        if required_fields and not required_fields.issubset(step_dict.keys()):
+            missing_fields = required_fields - step_dict.keys()
+            raise ValueError(f"Missing required field(s) {', '.join(missing_fields)} for {op} operation.")
+
+        step_dict.pop('operation')
         if op == 'PCR':
             steps.append(PCR(**step_dict))
         elif op == 'Digest':
@@ -51,4 +70,3 @@ def parse_CF_JSON(json_string):
             raise ValueError(f"Unrecognized operation: {op}")
     
     return ConstructionFile(steps, sequences)
-
