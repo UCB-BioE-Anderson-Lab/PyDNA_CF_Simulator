@@ -5,6 +5,11 @@ from pydna.utils import rc
 
 
 def polynucleotide_to_dseqrecord(poly):
+    # Convert the sequence and extensions to uppercase
+    sequence = poly.sequence.upper()
+    ext5 = poly.ext5.upper() if poly.ext5 else ''
+    ext3 = poly.ext3.upper() if poly.ext3 else ''
+    
     # Check the sequence data
     if not re.match(r'^[ATCGNRKYSWBVHDM]+$', poly.sequence):
         raise ValueError("Invalid characters in sequence. Sequence must only contain the characters ATCGNRKYSWBVHDM.")

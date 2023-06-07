@@ -10,7 +10,7 @@ def dseqrecord_to_polynucleotide(dseqrecord: Dseqrecord, mod_ext5: str, mod_ext3
     # Get sequence and extensions
     watson = dseqrecord.seq.watson
     crick = dseqrecord.seq.crick
-    
+
     # Determine the type of overhangs
     lefty = 'prime3' if dseqrecord.seq.ovhg < 0 else 'blunt' if dseqrecord.seq.ovhg == 0 else 'prime5'
     lefty_overhang = dseqrecord.seq.ovhg

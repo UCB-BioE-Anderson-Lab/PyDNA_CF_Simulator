@@ -11,13 +11,26 @@ test_examples = [
     ('Lefty blunt, righty 3\' extension', 'ATGCGCTGAC', '', 'TC', False),
     ('Righty blunt, lefty 5\' extension', 'ATGCGCTGAC', 'CGAA', '', False),
     ('Righty blunt, lefty 3\' extension', 'ATGCGCTGAC', '-CGAA', '', False),
-    ('Circular sequence with no overhangs', 'ATGCGCTGAC', '', '', True)
+    ('Circular sequence with no overhangs', 'ATGCGCTGAC', '', '', True),
+    ('Degenerate nucleotides', 'ATGCNRYKSWBVHDM', '', '', False),
 ]
 
 exception_test_examples = [
     ('Circular sequence with overhangs (ext5)', 'ATGCGCTGAC', 'CGAA', '', True),
     ('Circular sequence with overhangs (ext3)', 'ATGCGCTGAC', '', 'TC', True),
-    ('Invalid characters in sequence', 'ATGCGCTGACX', '', '', False)
+    ('Invalid characters in sequence', 'ATGCGCTGACX', '', '', False),
+    ('Whitespace characters', 'ATGC ATCG', '', '', False),
+    ('Special characters', 'ATGC!', '', '', False),
+    ('Numeric characters', 'ATGC4', '', '', False),
+    ('Degenerate nucleotides in left extension', 'ATGC', 'NAAA', '', False),
+    ('Degenerate nucleotides in righty extension', 'ATGC', '', 'NAAA', False),
+    ('Whitespace characters in lefty extension', 'A TGC', 'ATGC', '', False),
+    ('Whitespace characters in righty extension', 'ATGC', 'A TGC', '', False),
+    ('Special characters in lefty extension', '!ATGC', 'ATCG', '', False),
+    ('Special characters in rigty extension', 'ATGC', '!ATCG', '', False),
+    ('Numeric characters in lefty extension', '1ATCG', 'ATCG', '', False),
+    ('Numeric characters in righty extension', 'ATGC', '1ATCG', '', False),
+    ('Empty sequence with non-empty extensions', '', 'ATGC', 'CGTA', False),
 ]
 
 @pytest.mark.parametrize('description,sequence,ext_5,ext_3,is_circular', test_examples)
