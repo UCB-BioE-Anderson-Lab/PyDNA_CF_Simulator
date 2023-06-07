@@ -1,80 +1,44 @@
-from pydna.dseq import Dseq
 from pydna.dseqrecord import Dseqrecord
-from pydna.assembly import Assembly
-from pydna.amplify import pcr
 from pydna.primer import Primer
-from Bio.Restriction import Restriction
+from pydna.dseq import Dseq
+from pydna.assembly import Assembly
+from pydna.amplicon import Amplicon
+from .polynucleotide_to_dseqrecord import polynucleotide_to_dseqrecord
+from .dseqrecord_to_polynucleotide import dseqrecord_to_polynucleotide
 
-from construction_file import PCR, Digest, Ligate, GoldenGate, Gibson, Transform
-from polynucleotide import Polynucleotide, dsDNA, oligo, plasmid
-
-
-def simulate_CF(CF):
-    # Store the result DNA sequences
-    result_sequences = CF.sequences
-
-    # Perform the operations
-    for step in CF.steps:
-        # Perform the operation
-        if type(step) == PCR:
-            # Get the input sequences
-            forward_oligo = result_sequences[step.forward_oligo]
-            reverse_oligo = result_sequences[step.reverse_oligo]
-            template = result_sequences[step.template]
-
-            # Perform the PCR operation
-            product_sequence = pcr(forward_oligo, reverse_oligo, template)
-
-        elif type(step) == Digest:
-            # Get the input sequence
-            dna = Dseq(result_sequences[step.dna])
-
-            # Create the enzyme objects
-            enzymes = [getattr(Restriction, enzyme) for enzyme in step.enzymes]
-
-            # Digest the DNA with the enzymes
-            product_sequences = dna.cut(*enzymes)
-            # Get the index of the fragment to carry forward
-            fragment_index = step.fragSelect
-            # Check if the index is valid
-            if fragment_index < 0 or fragment_index >= len(product_sequences):
-                raise ValueError('Invalid fragment index: ' + str(fragment_index))
-            # Carry forward the specified fragment
-            product_sequence = product_sequences[fragment_index]
+from .polynucleotide import oligo
 
 
-        elif type(step) == Ligate:
-            # Assume the first two sequences are fragments
-            # Ligate the fragments
-            product_sequence = input_sequences[0] + input_sequences[1]
-
-        elif type(step) == GoldenGate:
-            # Assume the first two sequences are fragments and the third one is the enzyme
-            # Digest the fragments with the enzyme and then ligate them
-            product_sequence = input_sequences[0].cut(step.enzyme) + input_sequences[1].cut(step.enzyme)
-
-        elif type(step) == Gibson:
-            # Assume the first two sequences are fragments
-            # Perform Gibson assembly
-            product_sequence = Assembly(input_sequences).assemble_circular()[0]
-
-        elif type(step) == Transform:
-            # Not sure how to simulate transformation, just return the plasmid sequence
-            product_sequence = input_sequences[0]
-
+def simulate_CF(construction_file):
+    # Convert all Polynucleotide sequences in the CF to Dseqrecord or Primer
+    polyDictionary = construction_file.sequences
+    dseqDictionary = {}
+    for name, poly in construction_file.sequences.items():
+        if poly.is_double_stranded:
+            dseqDictionary[name] = polynucleotide_to_dseqrecord(poly)
         else:
-            raise ValueError('Invalid operation: ' + step.operation)
+            dseqDictionary[name] = Primer(poly.sequence)
 
-        # Check if the sequence is an oligo or a plasmid
-        if isinstance(product_sequence, oligo):
-            # It's an oligo, make it single stranded and linear
-            product_sequence = Dseqrecord(product_sequence.seq, linear=True)
-        elif isinstance(product_sequence, plasmid):
-            # It's a plasmid, make it double stranded and circular
-            product_sequence = Dseqrecord(product_sequence.seq, circular=True)
+    # Iterate through the steps
+    for step in construction_file.steps:
+        operation = step.operation
+        product_name = step.output
 
-        # Store the product sequence
-        result_sequences[step.output] = product_sequence
+        # Switch based on the operation
+        if operation == 'PCR':
+            amplicon = Amplicon(dseqDictionary[step.forward_oligo], dseqDictionary[step.reverse_oligo], dseqDictionary[step.template])
+            dseqDictionary[product_name] = amplicon
+            product_poly = dseqrecord_to_polynucleotide(amplicon, polyDictionary[step.forward_oligo].mod_ext5, polyDictionary[step.reverse_oligo].mod_ext5) 
+            polyDictionary[step.template] = product_poly;
+        elif operation == 'Digest':
+            raise NotImplementedError('Digest operation is not implemented')
+        elif operation == 'Ligate':
+            raise NotImplementedError('Ligate operation is not implemented')
+        elif operation == 'GoldenGate':
+            raise NotImplementedError('GoldenGate operation is not implemented')
+        elif operation == 'Gibson':
+            raise NotImplementedError('Gibson operation is not implemented')
+        elif operation == 'Transform':
+            raise NotImplementedError('Transform operation is not implemented')
 
-    # Return the resulting sequences
-    return result_sequences
+    return polyDictionary
