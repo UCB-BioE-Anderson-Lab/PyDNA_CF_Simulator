@@ -4,11 +4,66 @@ from pydna_cf_simulator.construction_file import ConstructionFile, PCR, Digest, 
 from pydna_cf_simulator.polynucleotide import Polynucleotide
 
 
-def test_simulate_CF_PCR():
+def test_simulate_PCR():
     # Define sequences
     forward = Polynucleotide('CCGCAACACACTTAACCTTG', '', '', False, False, 'hydroxyl', 'hydroxyl')
     reverse = Polynucleotide('GTGGTTGTGGCCGGTCAAATC', '', '', False, False, 'hydroxyl', 'hydroxyl')
     template = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCACCG', '', '', True, False, 'phosphate', 'phosphate')
+
+    # Define steps
+    step = PCR('forward', 'reverse', 'template', 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'forward': forward, 'reverse': reverse, 'template': template})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCAC', '', '', True, False, 'hydroxyl', 'hydroxyl')
+
+def test_simulate_PCR_with_extensions():
+    # Define sequences
+    forward = Polynucleotide('CCATAGGATCCCCGCAACACACTTAACCTTG', '', '', False, False, 'hydroxyl', 'hydroxyl')
+    reverse = Polynucleotide('GAGTCGAATTCGTGGTTGTGGCCGGTCAAATC', '', '', False, False, 'hydroxyl', 'hydroxyl')
+    template = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCACCG', '', '', True, False, 'phosphate', 'phosphate')
+
+    # Define steps
+    step = PCR('forward', 'reverse', 'template', 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'forward': forward, 'reverse': reverse, 'template': template})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CCATAGGATCCCCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCACGAATTCGACTC', '', '', True, False, 'hydroxyl', 'hydroxyl')
+
+
+def test_simulate_circular_template_PCR():
+    # Define sequences
+    forward = Polynucleotide('CCGCAACACACTTAACCTTG', '', '', False, False, 'hydroxyl', 'hydroxyl')
+    reverse = Polynucleotide('GTGGTTGTGGCCGGTCAAATC', '', '', False, False, 'hydroxyl', 'hydroxyl')
+    template = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCACCG', '', '', True, True, '', '')
+
+    # Define steps
+    step = PCR('forward', 'reverse', 'template', 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'forward': forward, 'reverse': reverse, 'template': template})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCAC', '', '', True, False, 'hydroxyl', 'hydroxyl')
+
+def test_simulate_permuted_circular_template_PCR():
+    # Define sequences
+    forward = Polynucleotide('CCGCAACACACTTAACCTTG', '', '', False, False, 'hydroxyl', 'hydroxyl')
+    reverse = Polynucleotide('GTGGTTGTGGCCGGTCAAATC', '', '', False, False, 'hydroxyl', 'hydroxyl')
+    template = Polynucleotide('GTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCACCGCCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCT', '', '', True, True, '', '')
 
     # Define steps
     step = PCR('forward', 'reverse', 'template', 'product')
