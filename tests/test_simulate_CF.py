@@ -218,3 +218,21 @@ def test_simulate_ligate_single_circular():
     # Assert that the product is correct
     expected = Polynucleotide('GATCGTATACCCA', '', '', True, True, '', '')
     assert result['product'] == expected
+
+def test_simulate_Gibson():
+    # Define sequences
+    poly1 = Polynucleotide('GAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTG', '', '', True, False, '', '')
+    poly2 = Polynucleotide('TTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTGGTTTATTGAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGAC', '', '', True, False, '', '')
+
+    # Define steps
+    step = Gibson(['poly1', 'poly2'], 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'poly1': poly1, 'poly2': poly2})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('GAACTACTTACTCTAGCTTCCCGGCAACAATTAATAGACTGGATGGAGGCGGATAAAGTTGCAGGACCACTTCTGCGCTCGGCCCTTCCGGCTGGCTGGTTTATT', '', '', True, True, '', '')
+    assert result['product'] == expected

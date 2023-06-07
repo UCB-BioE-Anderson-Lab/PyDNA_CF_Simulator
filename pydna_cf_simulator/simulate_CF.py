@@ -85,10 +85,21 @@ def simulate_CF(construction_file):
             dseqDictionary[product_name] = product
             polyDictionary[product_name] = product_poly;
 
+        elif operation == 'Gibson':
+            # Get inputs
+            fragments = [dseqDictionary[dna] for dna in step.dnas]
+            # Simulate Gibson Assembly
+            assembly = Assembly(fragments)
+            assemblies = assembly.assemble_circular()
+            product = assemblies[0]
+            # Store product
+            dseqDictionary[product_name] = product
+            product_poly = dseqrecord_to_polynucleotide(product, polyDictionary[step.dnas[0]].mod_ext5, polyDictionary[step.dnas[-1]].mod_ext3)
+            polyDictionary[product_name] = product_poly;
+
         elif operation == 'GoldenGate':
             raise NotImplementedError('GoldenGate operation is not implemented')
-        elif operation == 'Gibson':
-            raise NotImplementedError('Gibson operation is not implemented')
+ 
         elif operation == 'Transform':
             raise NotImplementedError('Transform operation is not implemented')
 
