@@ -2,8 +2,8 @@ from pydna.dseqrecord import Dseqrecord
 from pydna.primer import Primer
 from pydna.dseq import Dseq
 from pydna.assembly import Assembly
-from pydna.amplicon import Amplicon
 from pydna.amplify import pcr
+from Bio.Restriction import *
 from .polynucleotide_to_dseqrecord import polynucleotide_to_dseqrecord
 from .dseqrecord_to_polynucleotide import dseqrecord_to_polynucleotide
 
@@ -27,15 +27,37 @@ def simulate_CF(construction_file):
 
         # Switch based on the operation
         if operation == 'PCR':
+            # Get inputs
             forward = dseqDictionary[step.forward_oligo]
             reverse = dseqDictionary[step.reverse_oligo]
             template = dseqDictionary[step.template]
+            # Simulate PCR
             amplicon = pcr(forward, reverse, template)
+            # Store product
             dseqDictionary[product_name] = amplicon
             product_poly = dseqrecord_to_polynucleotide(amplicon, polyDictionary[step.forward_oligo].mod_ext5, polyDictionary[step.reverse_oligo].mod_ext5) 
-            polyDictionary[step.output] = product_poly;
+            polyDictionary[product_name] = product_poly;
+            
         elif operation == 'Digest':
-            raise NotImplementedError('Digest operation is not implemented')
+            # Get inputs
+            sequence = dseqDictionary[step.dna]
+            enzymes = [getattr(Restriction, name) for name in step.enzymes.split(',')]
+            fragselect = step.fragSelect
+            # Simulate Digest
+            fragments = sequence.cut(enzymes)
+            for i, fragment in enumerate(fragments):
+                print(f"Fragment {i}:")
+                print("Watson: ", fragment.seq.watson)
+                print("Crick: ", fragment.seq.crick)
+                print("Overhang: ", fragment.seq.ovhg)
+                print("\n")
+            
+            product = fragments[fragselect]
+            # Store product
+            dseqDictionary[product_name] = product
+            product_poly = dseqrecord_to_polynucleotide(product, 'phosphate', 'phosphate')
+            polyDictionary[product_name] = product_poly;
+            
         elif operation == 'Ligate':
             raise NotImplementedError('Ligate operation is not implemented')
         elif operation == 'GoldenGate':

@@ -99,19 +99,19 @@ def test_simulate_permuted_circular_template_PCR():
     expected = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCAC', '', '', True, False, 'hydroxyl', 'hydroxyl')
     assert result['product'] == expected
     
-##def test_simulate_Digest():
-##    # Define sequences
-##    sequence = Polynucleotide('GAGTCGAATTCATACGAGGGATCCAATCG', '', '', True, False, 'hydroxyl', 'hydroxyl')
-##
-##    # Define steps
-##    step = Digest('sequence', 'EcoRI,BamHI', '1', 'product')
-##
-##    # Define ConstructionFile
-##    cf = ConstructionFile([step], {'sequence': sequence})
-##
-##    # Simulate ConstructionFile
-##    result = simulate_CF(cf)
-##
-##    # Assert that the product is correct
-##    expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
-##    assert result['product'] == expected
+def test_simulate_Digest():
+    # Define sequences
+    sequence = Polynucleotide('GAGTCGAATTCATACGAGGGATCCAATCG', '', '', True, False, 'hydroxyl', 'hydroxyl')
+
+    # Define steps
+    step = Digest('sequence', 'EcoRI,BamHI', 1, 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'sequence': sequence})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
+    assert result['product'] == expected

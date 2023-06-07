@@ -34,11 +34,11 @@ def polynucleotide_to_dseqrecord(poly):
     ext_5 = poly.ext5
     if not ext_5.startswith('-'):
         coding_strand = ext_5 + coding_strand
-        overhang = len(ext_5)
+        overhang = -len(ext_5)
     else:
         ext_5 = ext_5[1:]
         complementary_strand = complementary_strand + rc(ext_5)
-        overhang = -len(ext_5)
+        overhang = len(ext_5)
 
     # Handle 3' extension
     ext_3 = poly.ext3
