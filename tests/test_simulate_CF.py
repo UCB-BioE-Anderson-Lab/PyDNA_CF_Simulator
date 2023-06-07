@@ -3,7 +3,6 @@ from pydna_cf_simulator.simulate_CF import simulate_CF
 from pydna_cf_simulator.construction_file import ConstructionFile, PCR, Digest, Ligate, GoldenGate, Gibson, Transform
 from pydna_cf_simulator.polynucleotide import Polynucleotide
 
-
 def test_simulate_PCR():
     # Define sequences
     forward = Polynucleotide('CCGCAACACACTTAACCTTG', '', '', False, False, 'hydroxyl', 'hydroxyl')
@@ -99,7 +98,7 @@ def test_simulate_permuted_circular_template_PCR():
     expected = Polynucleotide('CCGCAACACACTTAACCTTGGCGTCGGGATACGTACATTGGAGAACGGTTGGCTGTACGGACTTAATACTTTTTATGATAATGATTTGACCGGCCACAACCAC', '', '', True, False, 'hydroxyl', 'hydroxyl')
     assert result['product'] == expected
     
-def test_simulate_Digest():
+def test_simulate_digest():
     # Define sequences
     sequence = Polynucleotide('GAGTCGAATTCATACGAGGGATCCAATCG', '', '', True, False, 'hydroxyl', 'hydroxyl')
 
@@ -115,3 +114,55 @@ def test_simulate_Digest():
     # Assert that the product is correct
     expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
     assert result['product'] == expected
+    
+def test_simulate_digest_circular1(): # Fragment in middle of sequence (index 1)
+    # Define sequences
+    sequence = Polynucleotide('GAGTCGAATTCATACGAGGGATCCAATCG', '', '', True, True, '', '')
+
+    # Define steps
+    step = Digest('sequence', 'BamHI,EcoRI', 1, 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'sequence': sequence})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
+    assert result['product'] == expected
+
+def test_simulate_digest_circular2():  # Input DNA starts with restriction site (index 1)
+    # Define sequences
+    sequence = Polynucleotide('GAATTCATACGAGGGATCCAATCGGAGTC', '', '', True, True, '', '')
+
+    # Define steps
+    step = Digest('sequence', 'BamHI,EcoRI', 1, 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'sequence': sequence})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
+    assert result['product'] == expected
+
+def test_simulate_digest_circular3():  # Input DNA starts with sticky end  (index 0)
+    # Define sequences
+    sequence = Polynucleotide('AATTCATACGAGGGATCCAATCGGAGTCG', '', '', True, True, '', '')
+
+    # Define steps
+    step = Digest('sequence', 'BamHI,EcoRI', 0, 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'sequence': sequence})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
+    assert result['product'] == expected
+

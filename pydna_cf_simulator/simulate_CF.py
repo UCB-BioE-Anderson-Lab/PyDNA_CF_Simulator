@@ -51,7 +51,12 @@ def simulate_CF(construction_file):
                 print("Crick: ", fragment.seq.crick)
                 print("Overhang: ", fragment.seq.ovhg)
                 print("\n")
-            
+
+            # Adjust fragment selection if the sequence was circular
+            if sequence.circular:
+                if not sequence.seq.watson.startswith(fragments[0].seq.watson):
+                    fragselect = (fragselect + 1) % len(fragments)
+
             product = fragments[fragselect]
             # Store product
             dseqDictionary[product_name] = product
