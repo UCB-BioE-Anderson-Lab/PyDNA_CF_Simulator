@@ -166,3 +166,55 @@ def test_simulate_digest_circular3():  # Input DNA starts with sticky end  (inde
     expected = Polynucleotide('CATACGAGG', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
     assert result['product'] == expected
 
+def test_simulate_ligate_linear():
+    # Define sequences
+    polyL = Polynucleotide('GTATACCCA', '', 'GATC', True, False, 'hydroxyl', 'phosphate')
+    polyR = Polynucleotide('CATATGCAG', 'GATC', '', True, False, 'phosphate', 'hydroxyl')
+
+    # Define steps
+    step = Ligate(['polyL', 'polyR'], 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'polyL': polyL, 'polyR': polyR})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('GTATACCCAGATCCATATGCAG', '', '', True, False, 'hydroxyl', 'hydroxyl')
+    assert result['product'] == expected
+
+def test_simulate_ligate_circular():
+    # Define sequences
+    polyL = Polynucleotide('GTATACCCA', 'AATT', 'GATC', True, False, 'phosphate', 'phosphate')
+    polyR = Polynucleotide('CATATGCAG', 'GATC', 'AATT', True, False, 'phosphate', 'phosphate')
+
+    # Define steps
+    step = Ligate(['polyL', 'polyR'], 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'polyL': polyL, 'polyR': polyR})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('AATTGTATACCCAGATCCATATGCAG', '', '', True, True, '', '')
+    assert result['product'] == expected
+
+def test_simulate_ligate_single_circular():
+    # Define sequences
+    poly = Polynucleotide('GTATACCCA', 'GATC', 'GATC', True, False, 'phosphate', 'phosphate')
+
+    # Define steps
+    step = Ligate(['poly'], 'product')
+
+    # Define ConstructionFile
+    cf = ConstructionFile([step], {'poly': poly})
+
+    # Simulate ConstructionFile
+    result = simulate_CF(cf)
+
+    # Assert that the product is correct
+    expected = Polynucleotide('GATCGTATACCCA', '', '', True, True, '', '')
+    assert result['product'] == expected

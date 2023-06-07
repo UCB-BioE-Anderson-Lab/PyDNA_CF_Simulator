@@ -11,8 +11,8 @@ REQUIRED_FIELDS = {
     'PCR': {'output', 'forward_oligo', 'reverse_oligo', 'template'},
     'Digest': {'dna', 'enzymes', 'fragSelect', 'output'},
     'Ligate': {'dnas', 'output'},
-    'GoldenGate': {'inputs', 'enzyme', 'output'},
-    'Gibson': {'inputs', 'output'},
+    'GoldenGate': {'dnas', 'enzyme', 'output'},
+    'Gibson': {'dnas', 'output'},
     'Transform': {'dna', 'strain', 'antibiotics', 'output'}
 }
 

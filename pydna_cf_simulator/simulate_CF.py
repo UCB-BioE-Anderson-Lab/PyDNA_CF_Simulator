@@ -64,7 +64,27 @@ def simulate_CF(construction_file):
             polyDictionary[product_name] = product_poly;
             
         elif operation == 'Ligate':
-            raise NotImplementedError('Ligate operation is not implemented')
+            # Get inputs
+            fragments = [dseqDictionary[dna] for dna in step.dnas]
+            # Simulate Ligate
+            product = fragments[0]
+            for fragment in fragments[1:]:
+                product += fragment
+            # Convert to Polynucleotide and check for circularization
+            product_poly = dseqrecord_to_polynucleotide(product, polyDictionary[step.dnas[0]].mod_ext5, polyDictionary[step.dnas[-1]].mod_ext3)
+            if product_poly.ext5 == product_poly.ext3 and product_poly.mod_ext5 == 'phosphate' and product_poly.mod_ext3 == 'phosphate':
+                product_poly.sequence = product_poly.ext5 + product_poly.sequence
+                product_poly.ext5 = ""
+                product_poly.ext3 = ""
+                product_poly.mod_ext5 = ""
+                product_poly.mod_ext3 = ""
+                product_poly.is_circular = True
+            # Convert back to Dseqrecord for storage
+            product = polynucleotide_to_dseqrecord(product_poly)
+            # Store product
+            dseqDictionary[product_name] = product
+            polyDictionary[product_name] = product_poly;
+
         elif operation == 'GoldenGate':
             raise NotImplementedError('GoldenGate operation is not implemented')
         elif operation == 'Gibson':

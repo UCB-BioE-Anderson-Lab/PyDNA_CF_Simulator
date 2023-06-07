@@ -24,7 +24,7 @@
  *     },
  *     {
  *       "operation": "GoldenGate",
- *       "inputs": ["P6"],
+ *       "dnas": ["P6"],
  *       "enzyme": "BsaI",
  *       "output": "pP6"
  *     }
@@ -64,13 +64,13 @@
  *
  * @typedef {Object} GoldenGate
  * @property {'GoldenGate'} operation - The type of operation.
- * @property {Array.<string>} inputs - An array of DNA part identifiers being assembled in the GoldenGate reaction.
+ * @property {Array.<string>} dnas - An array of DNA part identifiers being assembled in the GoldenGate reaction.
  * @property {'AarI'|'BbsI'|'BsaI'|'BsmBI'|'SapI'|'BseRI'} enzyme - The Type IIS-like enzyme used with ligase in the assembly reaction.
  * @property {string} output - The name of the output product of the operation (DNA identifier).
  * 
  * @typedef {Object} Gibson
  * @property {'Gibson'} operation - The type of operation.
- * @property {Array.<string>} inputs - An array of DNA part identifiers being assembled using the Gibson reaction.
+ * @property {Array.<string>} dnas - An array of DNA part identifiers being assembled using the Gibson reaction.
  * @property {string} output - The name of the output product of the operation (DNA identifier).
  * 
  * @typedef {Object} Transform

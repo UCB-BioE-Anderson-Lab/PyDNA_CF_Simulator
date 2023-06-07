@@ -29,16 +29,16 @@ class Ligate(Step):
 
 
 class GoldenGate(Step):
-    def __init__(self, inputs, enzyme, output):
+    def __init__(self, dnas, enzyme, output):
         super().__init__('GoldenGate', output)
-        self.inputs = inputs
+        self.dnas = dnas
         self.enzyme = enzyme
 
 
 class Gibson(Step):
-    def __init__(self, inputs, output):
+    def __init__(self, dnas, output):
         super().__init__('Gibson', output)
-        self.inputs = inputs
+        self.dnas = dnas
 
 
 class Transform(Step):

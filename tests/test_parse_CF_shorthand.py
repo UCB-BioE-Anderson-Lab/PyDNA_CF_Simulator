@@ -19,8 +19,8 @@ def test_parse_golden_gate():
     assert isinstance(cf, ConstructionFile)
     assert len(cf.steps) == 1
     assert isinstance(cf.steps[0], GoldenGate)
-    assert 'Fragment1' in cf.steps[0].inputs
-    assert 'Fragment2' in cf.steps[0].inputs
+    assert 'Fragment1' in cf.steps[0].dnas
+    assert 'Fragment2' in cf.steps[0].dnas
     assert cf.steps[0].enzyme == 'BsaI'
     assert cf.steps[0].output == 'ProductName'
 
@@ -57,8 +57,8 @@ def test_parse_gibson():
     assert isinstance(cf, ConstructionFile)
     assert len(cf.steps) == 1
     assert isinstance(cf.steps[0], Gibson)
-    assert 'Fragment1' in cf.steps[0].inputs
-    assert 'Fragment2' in cf.steps[0].inputs
+    assert 'Fragment1' in cf.steps[0].dnas
+    assert 'Fragment2' in cf.steps[0].dnas
     assert cf.steps[0].output == 'ProductName'
 
 def test_parse_transform():

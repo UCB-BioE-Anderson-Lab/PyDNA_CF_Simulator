@@ -100,7 +100,7 @@ def test_golden_gate():
         "steps": [
             {
                 "operation": "GoldenGate",
-                "inputs": ["Fragment1", "Fragment2"],
+                "dnas": ["Fragment1", "Fragment2"],
                 "enzyme": "BsaI",
                 "output": "ProductName"
             }
@@ -112,7 +112,7 @@ def test_golden_gate():
 
     assert len(cf.steps) == 1
     assert cf.steps[0].operation == "GoldenGate"
-    assert cf.steps[0].inputs == ["Fragment1", "Fragment2"]
+    assert cf.steps[0].dnas == ["Fragment1", "Fragment2"]
     assert cf.steps[0].enzyme == "BsaI"
     assert cf.steps[0].output == "ProductName"
 
@@ -121,7 +121,7 @@ def test_gibson():
         "steps": [
             {
                 "operation": "Gibson",
-                "inputs": ["Fragment1", "Fragment2"],
+                "dnas": ["Fragment1", "Fragment2"],
                 "output": "ProductName"
             }
         ],
@@ -132,7 +132,7 @@ def test_gibson():
 
     assert len(cf.steps) == 1
     assert cf.steps[0].operation == "Gibson"
-    assert cf.steps[0].inputs == ["Fragment1", "Fragment2"]
+    assert cf.steps[0].dnas == ["Fragment1", "Fragment2"]
     assert cf.steps[0].output == "ProductName"
 
 def test_transform():
@@ -199,7 +199,7 @@ def test_unrecognized_enzyme_golden_gate():
         "steps": [
             {
                 "operation": "GoldenGate",
-                "inputs": ["Fragment1", "Fragment2"],
+                "dnas": ["Fragment1", "Fragment2"],
                 "enzyme": "InvalidEnzyme",
                 "output": "ProductName"
             }
