@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: PyDNA_CF_Simulator
+  version: '1.0.0'
+paths:
+  /simulate:
+    post:
+      operationId: simulate
+      summary: Simulate Construction File
+      description: This operation simulates a construction file. The input is a String in CF shorthand format, including any known sequence data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cf:
+                  type: string
+                  description: A String in CF shorthand format, including any known sequence data.
+      responses:
+        '200':
+          description: OK. The response is a JSON object that represents the simulation result.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Simulation result as a JSON object.
