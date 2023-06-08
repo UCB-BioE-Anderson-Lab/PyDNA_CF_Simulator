@@ -8,11 +8,21 @@ TYPE_IIS_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI']
 VALID_ANTIBIOTICS = {'Amp', 'Carb', 'Cam', 'Kan', 'Gen', 'Spec', 'Trim'}
 
 def parse_CF_shorthand(cf_shorthand):
+    # Remove /*comment*/ style comments
+    cf_shorthand = re.sub(r'/\*.*?\*/', '', cf_shorthand, flags=re.DOTALL)
+
     lines = cf_shorthand.split('\n')
     steps = []
     sequences = {}
 
     for line_num, line in enumerate(lines, start=1):
+        # Remove # and // style comments
+        line = re.split(r'#|//', line)[0]
+
+        # Skip empty or whitespace-only lines
+        if not line.strip():
+            continue
+        
         elements = line.split()
 
         try:
