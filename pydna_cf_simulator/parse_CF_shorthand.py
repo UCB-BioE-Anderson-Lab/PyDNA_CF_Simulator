@@ -1,7 +1,7 @@
 import re
 
 from .construction_file import ConstructionFile, PCR, Digest, Ligate, GoldenGate, Gibson, Transform
-from .polynucleotide import Polynucleotide, oligo, plasmid
+from .polynucleotide import Polynucleotide, oligo, plasmid, dsDNA
 
 ALL_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI', 'BamHI', 'BglII', 'EcoRI', 'XhoI', 'SpeI', 'XbaI', 'PstI', 'HindIII', 'NotI', 'XmaI', 'SmaI', 'KpnI', 'SacI', 'SalI']
 TYPE_IIS_ENZYMES = ['AarI', 'BbsI', 'BsaI', 'BsmBI', 'SapI', 'BseRI']
@@ -39,9 +39,9 @@ def parse_CF_shorthand(cf_shorthand):
                     raise ValueError(f"Error in line {line_num}: Invalid sequence format. Sequences must only contain characters 'A', 'T', 'C', 'G', 'N', 'R', 'K', 'Y', 'S', 'W', 'B', 'V', 'H', 'D', and be at least one character long.")
             else:
                 # It's a step, parse it
-                operation = elements[0]
+                operation = elements[0].lower()
 
-                if operation == 'PCR':
+                if operation == 'pcr':
                     try:
                         if len(elements) == 6:
                             forward_primer, reverse_primer, template, product_size, product_name = elements[1:]
@@ -54,7 +54,7 @@ def parse_CF_shorthand(cf_shorthand):
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for PCR operation.")
                     except IndexError:
                         raise ValueError(f"Error in line {line_num}: Invalid number of arguments for PCR operation.")
-                elif operation == 'Digest':
+                elif operation == 'digest':
                     try:
                         if len(elements) == 5:
                             dna, enzymes, frag_select, product_name = elements[1:]
@@ -71,7 +71,7 @@ def parse_CF_shorthand(cf_shorthand):
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Digest operation.")
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Digest operation.")
-                elif operation == 'Ligate':
+                elif operation == 'ligate':
                     try:
                         if len(elements) >= 4:
                             dnas, product_name = elements[1:-1], elements[-1]
@@ -82,7 +82,7 @@ def parse_CF_shorthand(cf_shorthand):
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Ligate operation.")
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Ligate operation.")
-                elif operation == 'GoldenGate':
+                elif operation == 'goldengate':
                     try:
                         if len(elements) >= 5:
                             inputs, enzyme, product_name = elements[1:-1], elements[-2], elements[-1]
@@ -95,7 +95,7 @@ def parse_CF_shorthand(cf_shorthand):
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for GoldenGate operation.")
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for GoldenGate operation.")
-                elif operation == 'Gibson':
+                elif operation == 'gibson':
                     try:
                         if len(elements) >= 4:
                             inputs, product_name = elements[1:-1], elements[-1]
@@ -106,7 +106,7 @@ def parse_CF_shorthand(cf_shorthand):
                             raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Gibson operation.")
                     except ValueError:
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Gibson operation.")
-                elif operation == 'Transform':
+                elif operation == 'transform':
                     try:
                         if len(elements) == 6:
                             dna, strain, antibiotics, temperature, output = elements[1:]
@@ -123,6 +123,39 @@ def parse_CF_shorthand(cf_shorthand):
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Transform operation.")
                     except IndexError:
                         raise ValueError(f"Error in line {line_num}: Invalid number of arguments for Transform operation.")
+
+                # Or it's a sequence with a biological type
+                elif operation == 'oligo':
+                    if len(elements) == 3:
+                        # It's a sequence, store it
+                        seqname, sequence = elements[1:]
+                        if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
+                            sequences[seqname] = oligo(sequence)
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid sequence format. Sequences must only contain characters 'A', 'T', 'C', 'G', 'N', 'R', 'K', 'Y', 'S', 'W', 'B', 'V', 'H', 'D', and be at least one character long.")
+                    else:
+                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for oligo operation.")
+                elif operation == 'plasmid':
+                    if len(elements) == 3:
+                        # It's a sequence, store it
+                        seqname, sequence = elements[1:]
+                        if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
+                            sequences[seqname] = plasmid(sequence)
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid sequence format. Sequences must only contain characters 'A', 'T', 'C', 'G', 'N', 'R', 'K', 'Y', 'S', 'W', 'B', 'V', 'H', 'D', and be at least one character long.")
+                    else:
+                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for plasmid operation.")
+                elif operation == 'dsdna':
+                    if len(elements) == 3:
+                        # It's a sequence, store it
+                        seqname, sequence = elements[1:]
+                        if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
+                            sequences[seqname] = dsDNA(sequence)
+                        else:
+                            raise ValueError(f"Error in line {line_num}: Invalid sequence format. Sequences must only contain characters 'A', 'T', 'C', 'G', 'N', 'R', 'K', 'Y', 'S', 'W', 'B', 'V', 'H', 'D', and be at least one character long.")
+                    else:
+                        raise ValueError(f"Error in line {line_num}: Invalid number of arguments for dsdna operation.")
+
                 else:
                     raise ValueError(f"Error in line {line_num}: Invalid operation {operation}")
         except (ValueError, IndexError) as e:

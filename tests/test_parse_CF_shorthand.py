@@ -44,14 +44,6 @@ def test_parse_ligate():
     assert 'Fragment2' in cf.steps[0].dnas
     assert cf.steps[0].output == 'ProductName'
 
-def test_parse_sequences():
-    cf = parse_CF_shorthand('P6libF CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC')
-    assert isinstance(cf, ConstructionFile)
-    assert len(cf.sequences) == 1
-    assert isinstance(cf.sequences['P6libF'], Polynucleotide)
-    assert cf.sequences['P6libF'].sequence == 'CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC'
-
-
 def test_parse_gibson():
     cf = parse_CF_shorthand('Gibson Fragment1 Fragment2 ProductName')
     assert isinstance(cf, ConstructionFile)
@@ -90,12 +82,64 @@ def test_parse_multiple_steps():
     assert isinstance(cf.steps[0], PCR)
     assert isinstance(cf.steps[1], GoldenGate)
 
+def test_parse_oligo_sequence():
+    cf = parse_CF_shorthand('P6libF CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC')
+    assert isinstance(cf, ConstructionFile)
+    assert len(cf.sequences) == 1
+    assert isinstance(cf.sequences['P6libF'], Polynucleotide)
+    assert cf.sequences['P6libF'].sequence == 'CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC'
+    assert cf.sequences['P6libF'].is_double_stranded == False
+    assert cf.sequences['P6libF'].is_circular == False
+    
+def test_parse_plasmid_sequence():
+    long_sequence = 'A' * 1000
+    cf = parse_CF_shorthand(f'pPlas1 {long_sequence}')
+    assert isinstance(cf, ConstructionFile)
+    assert len(cf.sequences) == 1
+    assert isinstance(cf.sequences['pPlas1'], Polynucleotide)
+    assert cf.sequences['pPlas1'].sequence == long_sequence
+    assert cf.sequences['pPlas1'].is_double_stranded == True
+    assert cf.sequences['pPlas1'].is_circular == True
+
 def test_parse_multiple_sequences():
-    cf = parse_CF_shorthand('P6libF CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC\nP6libR CAGTTGGTCTCAATAATNNNNNNANNNNGTTAGTATTTCTCCTCGTCTACGGTTAACTGATACTC')
+    cf = parse_CF_shorthand('oligo P6libF CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC\noligo P6libR CAGTTGGTCTCAATAATNNNNNNANNNNGTTAGTATTTCTCCTCGTCTACGGTTAACTGATACTC')
     assert isinstance(cf, ConstructionFile)
     assert len(cf.sequences) == 2
     assert isinstance(cf.sequences['P6libF'], Polynucleotide)
+    assert cf.sequences['P6libF'].sequence == 'CCAAAGGTCTCATTATANNNNNNNNNNNNNNNNTGTCAANNNNGAACCCAGGACTCCTCGAAGTCGTTCTTAAGACAAC'
+    assert cf.sequences['P6libF'].is_double_stranded == False
+    assert cf.sequences['P6libF'].is_circular == False
     assert isinstance(cf.sequences['P6libR'], Polynucleotide)
+    assert cf.sequences['P6libR'].sequence == 'CAGTTGGTCTCAATAATNNNNNNANNNNGTTAGTATTTCTCCTCGTCTACGGTTAACTGATACTC'
+    assert cf.sequences['P6libR'].is_double_stranded == False
+    assert cf.sequences['P6libR'].is_circular == False
+
+def test_parse_oligo():
+    cf = parse_CF_shorthand('oligo oligoname ATCAGATTT')
+    assert isinstance(cf, ConstructionFile)
+    assert len(cf.sequences) == 1
+    assert isinstance(cf.sequences['oligoname'], Polynucleotide)
+    assert cf.sequences['oligoname'].sequence == 'ATCAGATTT'
+    assert cf.sequences['oligoname'].is_double_stranded == False
+    assert cf.sequences['oligoname'].is_circular == False
+
+def test_parse_plasmid():
+    cf = parse_CF_shorthand('plasmid plasmidname ATCAGATTT')
+    assert isinstance(cf, ConstructionFile)
+    assert len(cf.sequences) == 1
+    assert isinstance(cf.sequences['plasmidname'], Polynucleotide)
+    assert cf.sequences['plasmidname'].sequence == 'ATCAGATTT'
+    assert cf.sequences['plasmidname'].is_double_stranded == True
+    assert cf.sequences['plasmidname'].is_circular == True
+
+def test_parse_dsdna():
+    cf = parse_CF_shorthand('dsdna dsdnaname ATCAGATTT')
+    assert isinstance(cf, ConstructionFile)
+    assert len(cf.sequences) == 1
+    assert isinstance(cf.sequences['dsdnaname'], Polynucleotide)
+    assert cf.sequences['dsdnaname'].sequence == 'ATCAGATTT'
+    assert cf.sequences['dsdnaname'].is_double_stranded == True
+    assert cf.sequences['dsdnaname'].is_circular == False
 
 def test_parse_invalid_sequence_format():
     with pytest.raises(ValueError) as e:
