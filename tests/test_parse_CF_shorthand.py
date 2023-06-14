@@ -158,7 +158,7 @@ def test_parse_invalid_number_of_arguments_digest():
 
 def test_parse_invalid_number_of_arguments_ligate():
     with pytest.raises(ValueError) as e:
-        parse_CF_shorthand('Ligate Fragment1 Fragment2')
+        parse_CF_shorthand('Ligate Fragment1 ')
     assert isinstance(e.value, ValueError)
 
 def test_parse_invalid_number_of_arguments_golden_gate():

@@ -73,7 +73,7 @@ def parse_CF_shorthand(cf_shorthand):
                         raise ValueError(f"Error in line {line_num}: Invalid argument type for Digest operation.")
                 elif operation == 'ligate':
                     try:
-                        if len(elements) >= 4:
+                        if len(elements) >= 3:
                             dnas, product_name = elements[1:-1], elements[-1]
                             if len(dnas) < 1:
                                 raise ValueError(f"Error in line {line_num}: Ligate operation requires at least 1 DNA inputs.")
@@ -129,6 +129,7 @@ def parse_CF_shorthand(cf_shorthand):
                     if len(elements) == 3:
                         # It's a sequence, store it
                         seqname, sequence = elements[1:]
+                        sequence = sequence.upper()
                         if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
                             sequences[seqname] = oligo(sequence)
                         else:
@@ -139,6 +140,7 @@ def parse_CF_shorthand(cf_shorthand):
                     if len(elements) == 3:
                         # It's a sequence, store it
                         seqname, sequence = elements[1:]
+                        sequence = sequence.upper()
                         if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
                             sequences[seqname] = plasmid(sequence)
                         else:
@@ -149,6 +151,7 @@ def parse_CF_shorthand(cf_shorthand):
                     if len(elements) == 3:
                         # It's a sequence, store it
                         seqname, sequence = elements[1:]
+                        sequence = sequence.upper()
                         if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
                             sequences[seqname] = dsDNA(sequence)
                         else:

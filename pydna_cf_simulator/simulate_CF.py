@@ -41,16 +41,11 @@ def simulate_CF(construction_file):
         elif operation == 'Digest':
             # Get inputs
             sequence = dseqDictionary[step.dna]
-            enzymes = [getattr(Restriction, name) for name in step.enzymes.split(',')]
+            enzymes = [Restriction.__dict__[name] for name in step.enzymes]
+
             fragselect = step.fragSelect
             # Simulate Digest
             fragments = sequence.cut(enzymes)
-            for i, fragment in enumerate(fragments):
-                print(f"Fragment {i}:")
-                print("Watson: ", fragment.seq.watson)
-                print("Crick: ", fragment.seq.crick)
-                print("Overhang: ", fragment.seq.ovhg)
-                print("\n")
 
             # Adjust fragment selection if the sequence was circular
             if sequence.circular:
@@ -101,6 +96,12 @@ def simulate_CF(construction_file):
             raise NotImplementedError('GoldenGate operation is not implemented')
  
         elif operation == 'Transform':
-            raise NotImplementedError('Transform operation is not implemented')
+            # Get the input DNA
+            transPoly = polyDictionary[step.dna]
+
+            # Check if DNA is circular
+            if not transPoly.is_circular:
+                raise ValueError(f"The DNA in the Transform operation must be circular, but '{step.dna}' is not.")
+            polyDictionary[product_name] = transPoly;
 
     return polyDictionary
