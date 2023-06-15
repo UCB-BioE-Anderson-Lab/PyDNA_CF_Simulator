@@ -30,6 +30,7 @@ def parse_CF_shorthand(cf_shorthand):
             if len(elements) == 2:
                 # It's a sequence, store it
                 name, sequence = elements
+                sequence = sequence.upper()
                 if re.match("^[ATCGNRKYSWBVHDM]+$", sequence):
                     if len(sequence) < 100:
                         sequences[name] = oligo(sequence)
