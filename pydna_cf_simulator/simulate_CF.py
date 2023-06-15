@@ -44,14 +44,8 @@ def simulate_CF(construction_file):
             enzymes = [Restriction.__dict__[name] for name in step.enzymes]
 
             fragselect = step.fragSelect
-            # Simulate Digest
+            # Simulate Digest and select fragment
             fragments = sequence.cut(enzymes)
-
-            # Adjust fragment selection if the sequence was circular
-            if sequence.circular:
-                if not sequence.seq.watson.startswith(fragments[0].seq.watson):
-                    fragselect = (fragselect + 1) % len(fragments)
-
             product = fragments[fragselect]
             # Store product
             dseqDictionary[product_name] = product

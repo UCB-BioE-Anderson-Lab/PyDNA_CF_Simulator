@@ -120,7 +120,7 @@ def test_simulate_digest_circular1(): # Fragment in middle of sequence (index 1)
     sequence = Polynucleotide('GAGTCGAATTCATACGAGGGATCCAATCG', '', '', True, True, '', '')
 
     # Define steps
-    step = Digest('sequence', ['BamHI', 'EcoRI'], 1, 'product')
+    step = Digest('sequence', ['BamHI', 'EcoRI'], 0, 'product')
 
     # Define ConstructionFile
     cf = ConstructionFile([step], {'sequence': sequence})
@@ -137,7 +137,7 @@ def test_simulate_digest_circular2():  # Input DNA starts with restriction site 
     sequence = Polynucleotide('GAATTCATACGAGGGATCCAATCGGAGTC', '', '', True, True, '', '')
 
     # Define steps
-    step = Digest('sequence', ['BamHI', 'EcoRI'], 1, 'product')
+    step = Digest('sequence', ['BamHI', 'EcoRI'], 0, 'product')
 
     # Define ConstructionFile
     cf = ConstructionFile([step], {'sequence': sequence})
