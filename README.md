@@ -38,6 +38,9 @@ PCR forward reverse template product
 
 This will simulate a PCR operation using the defined sequences and return the result.  
 
+![Demo](assets/plugin_demo.gif)
+
+
 ## Installation
 
 This project is not available via pip. To install it, you need to clone the repository and set it up manually. Here is the clone URL:
